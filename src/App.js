@@ -14,6 +14,7 @@ import { Toaster } from "react-hot-toast";
 import Particles from "@tsparticles/react";
 import { loadSlim } from "@tsparticles/slim";
 import { CartProvider } from "./context/CartContext";
+import { FavoritesProvider } from "./context/FavoritesContext";
 import { ThemeProvider } from "./context/ThemeContext";
 import { AuthProvider } from "./context/AuthContext";
 import { TrackingProvider } from "./context/TrackingContext";
@@ -31,6 +32,8 @@ import SignUp from "./pages/SignUp";
 import SignIn from "./pages/SignIn";
 import Search from "./pages/Search";
 import Tracking from "./pages/Tracking";
+import FavoritesPage from "./pages/FavoritesPage";
+import AIChat from "./pages/AIChat";
 import "./App.css";
 
 // Add error boundary for the entire app
@@ -100,6 +103,7 @@ function ScrollToTop() {
 function AppContent() {
   console.log('Rendering AppContent component...');
   const isFetching = useIsFetching();
+  const location = useLocation();
 
   const particleOptions = {
     particles: {
@@ -149,6 +153,104 @@ function AppContent() {
     }
   };
 
+  const isChatPage = location.pathname === "/chat";
+  const isSearchPage = location.pathname === "/search";
+  const isDeliveryPage = location.pathname === "/delivery";
+  const isFavoritesPage = location.pathname === "/favorites";
+  const isCartPage = location.pathname === "/cart";
+  const isProductDetailPage = location.pathname.startsWith("/product/");
+  const isCheckoutPage = location.pathname === "/checkout";
+  const isOrderConfirmationPage = location.pathname === "/order-confirmation";
+  const isOrderTrackingPage = location.pathname === "/order-tracking";
+  const isOrderHistoryPage = location.pathname === "/order-history";
+  const isProfilePage = location.pathname === "/profile";
+  const isSettingsPage = location.pathname === "/settings";
+  const isNotificationsPage = location.pathname === "/notifications";
+  const isHelpPage = location.pathname === "/help";
+  const isAboutPage = location.pathname === "/about";
+  const isContactPage = location.pathname === "/contact";
+  const isTermsPage = location.pathname === "/terms";
+  const isPrivacyPage = location.pathname === "/privacy";
+  const isShippingPage = location.pathname === "/shipping";
+  const isReturnsPage = location.pathname === "/returns";
+  const isFAQPage = location.pathname === "/faq";
+  const isBlogPage = location.pathname === "/blog";
+  const isBlogPostPage = location.pathname.startsWith("/blog/");
+  const isCategoryPage = location.pathname.startsWith("/category/");
+  const isBrandPage = location.pathname.startsWith("/brand/");
+  const isTagPage = location.pathname.startsWith("/tag/");
+  const isAuthorPage = location.pathname.startsWith("/author/");
+  const isArchivePage = location.pathname.startsWith("/archive/");
+  const is404Page = location.pathname === "/404";
+  const is500Page = location.pathname === "/500";
+  const isMaintenancePage = location.pathname === "/maintenance";
+  const isComingSoonPage = location.pathname === "/coming-soon";
+  const isLoginPage = location.pathname === "/login";
+  const isRegisterPage = location.pathname === "/register";
+  const isForgotPasswordPage = location.pathname === "/forgot-password";
+  const isResetPasswordPage = location.pathname === "/reset-password";
+  const isVerifyEmailPage = location.pathname === "/verify-email";
+  const isAdminPage = location.pathname.startsWith("/admin");
+  const isDashboardPage = location.pathname === "/dashboard";
+  const isAnalyticsPage = location.pathname === "/analytics";
+  const isReportsPage = location.pathname === "/reports";
+  const isUsersPage = location.pathname === "/users";
+  const isProductsPage = location.pathname === "/products";
+  const isOrdersPage = location.pathname === "/orders";
+  const isCustomersPage = location.pathname === "/customers";
+  const isLogoutPage = location.pathname === "/logout";
+  const isHomePage = location.pathname === "/";
+
+  const showFooter = !(
+    isChatPage ||
+    isSearchPage ||
+    isDeliveryPage ||
+    isFavoritesPage ||
+    isCartPage ||
+    isProductDetailPage ||
+    isCheckoutPage ||
+    isOrderConfirmationPage ||
+    isOrderTrackingPage ||
+    isOrderHistoryPage ||
+    isProfilePage ||
+    isSettingsPage ||
+    isNotificationsPage ||
+    isHelpPage ||
+    isAboutPage ||
+    isContactPage ||
+    isTermsPage ||
+    isPrivacyPage ||
+    isShippingPage ||
+    isReturnsPage ||
+    isFAQPage ||
+    isBlogPage ||
+    isBlogPostPage ||
+    isCategoryPage ||
+    isBrandPage ||
+    isTagPage ||
+    isAuthorPage ||
+    isArchivePage ||
+    is404Page ||
+    is500Page ||
+    isMaintenancePage ||
+    isComingSoonPage ||
+    isLoginPage ||
+    isRegisterPage ||
+    isForgotPasswordPage ||
+    isResetPasswordPage ||
+    isVerifyEmailPage ||
+    isAdminPage ||
+    isDashboardPage ||
+    isAnalyticsPage ||
+    isReportsPage ||
+    isUsersPage ||
+    isProductsPage ||
+    isOrdersPage ||
+    isCustomersPage ||
+    isLogoutPage ||
+    isHomePage
+  );
+
   return (
     <div className="app-container">
       <Particles id="tsparticles" init={particlesInit} options={particleOptions} />
@@ -160,6 +262,7 @@ function AppContent() {
             <Route path="/" element={<Home />} />
             <Route path="/about" element={<About />} />
             <Route path="/cart" element={<Cart />} />
+            <Route path="/chat" element={<AIChat />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/signup" element={<SignUp />} />
@@ -167,10 +270,11 @@ function AppContent() {
             <Route path="/product/:id" element={<ProductDetail />} />
             <Route path="/search" element={<Search />} />
             <Route path="/tracking" element={<Tracking />} />
+            <Route path="/favorites" element={<FavoritesPage />} />
           </Routes>
         </ErrorBoundary>
       </main>
-      <Footer />
+      {showFooter && <Footer />}
       <Toaster />
     </div>
   );
@@ -185,15 +289,17 @@ function App() {
           <AuthProvider>
             <TrackingProvider>
               <CartProvider>
-                <Router
-                  future={{
-                    v7_startTransition: true,
-                    v7_relativeSplatPath: true,
-                  }}
-                >
-                  <ScrollToTop />
-                  <AppContent />
-                </Router>
+                <FavoritesProvider>
+                  <Router
+                    future={{
+                      v7_startTransition: true,
+                      v7_relativeSplatPath: true,
+                    }}
+                  >
+                    <ScrollToTop />
+                    <AppContent />
+                  </Router>
+                </FavoritesProvider>
               </CartProvider>
             </TrackingProvider>
           </AuthProvider>

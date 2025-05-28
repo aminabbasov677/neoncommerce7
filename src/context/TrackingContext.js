@@ -1,7 +1,5 @@
 import React, { createContext, useContext, useReducer } from 'react';
 
-export const TrackingContext = createContext(null);
-
 const initialState = {
   orders: [
     {
@@ -44,6 +42,11 @@ const trackingReducer = (state, action) => {
   }
 };
 
+export const TrackingContext = createContext({
+  state: initialState,
+  dispatch: () => {}
+});
+
 export const TrackingProvider = ({ children }) => {
   const [state, dispatch] = useReducer(trackingReducer, initialState);
   const value = { state, dispatch };
@@ -57,9 +60,5 @@ export const TrackingProvider = ({ children }) => {
 
 export const useTracking = () => {
   const context = useContext(TrackingContext);
-  if (!context) {
-    console.warn('useTracking must be used within a TrackingProvider');
-    return { state: initialState, dispatch: () => {} };
-  }
   return context;
 };

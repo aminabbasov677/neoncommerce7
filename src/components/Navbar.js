@@ -158,6 +158,13 @@ function Navbar() {
                       My Profile
                     </Link>
                     <Link
+                      to="/favorites"
+                      className="dropdown-item"
+                      onClick={() => setIsProfileDropdownOpen(false)}
+                    >
+                      Favorites
+                    </Link>
+                    <Link
                       to="/tracking"
                       className="dropdown-item"
                       onClick={() => setIsProfileDropdownOpen(false)}
@@ -249,6 +256,13 @@ function Navbar() {
                   onClick={() => setIsMobilePopupOpen(false)}
                 >
                   My Profile
+                </Link>
+                <Link
+                  to="/favorites"
+                  className="mobile-link"
+                  onClick={() => setIsMobilePopupOpen(false)}
+                >
+                  Favorites
                 </Link>
                 <Link
                   to="/tracking"

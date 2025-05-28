@@ -7,21 +7,20 @@ import 'slick-carousel/slick/slick-theme.css';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
-import { TrackingProvider } from './context/TrackingContext';
 
 console.log('Starting application initialization...');
 
 const isBrowserCompatible = () => {
-  console.log('Checking browser compatibility...');
-  const features = {
-    es6: typeof Symbol !== 'undefined' && typeof Symbol.iterator !== 'undefined',
-    fetch: typeof fetch !== 'undefined',
-    localStorage: typeof localStorage !== 'undefined',
-    sessionStorage: typeof sessionStorage !== 'undefined',
-  };
-  const isCompatible = Object.values(features).every(feature => feature === true);
-  console.log('Browser compatibility check result:', isCompatible);
-  return isCompatible;
+  const requiredFeatures = [
+    'fetch',
+    'Promise',
+    'localStorage',
+    'sessionStorage',
+    'IntersectionObserver',
+    'ResizeObserver'
+  ];
+
+  return requiredFeatures.every(feature => feature in window);
 };
 
 const renderApp = () => {
@@ -39,9 +38,7 @@ const renderApp = () => {
         <ThemeProvider>
           <AuthProvider>
             <CartProvider>
-              <TrackingProvider>
-                <App />
-              </TrackingProvider>
+              <App />
             </CartProvider>
           </AuthProvider>
         </ThemeProvider>

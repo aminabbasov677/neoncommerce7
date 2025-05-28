@@ -1,24 +1,24 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from '@tanstack/react-query';
 import { motion } from "framer-motion";
-import { useCart } from "../context/CartContext";
 import Slider from "react-slick";
 import toast from "react-hot-toast";
+import { useFavorites } from "../context/FavoritesContext";
+import { FaHeart, FaRegHeart, FaStar, FaStarHalfAlt, FaRegStar } from "react-icons/fa";
 import "./Home.css";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import { useCart } from "../context/CartContext";
+import { useTheme } from "../context/ThemeContext";
 
 function Home() {
   const { dispatch } = useCart();
+  const { favorites, toggleFavorite } = useFavorites();
+  const { isDarkMode } = useTheme();
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState("all");
   const productsPerPage = 9;
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [categories, setCategories] = useState([]);
-  const [categoriesLoading, setCategoriesLoading] = useState(true);
-  const [categoriesError, setCategoriesError] = useState(null);
 
   const {
     data: categoriesData = [],
@@ -37,26 +37,25 @@ function Home() {
     isLoading: productsLoading,
     error: productsError,
   } = useQuery({
-    queryKey: ["products", selectedCategory],
-    queryFn: () =>
-      fetch(
-        selectedCategory
-          ? `https://fakestoreapi.com/products/category/${selectedCategory}`
-          : "https://fakestoreapi.com/products"
-      ).then((res) => res.json()),
+    queryKey: ["products"],
+    queryFn: () => fetch("https://fakestoreapi.com/products").then(res => res.json()),
   });
 
-  useEffect(() => {
-    // Simulate API call for categories
-    setTimeout(() => {
-      setCategories(["electronics", "clothing", "books", "home"]);
-      setCategoriesLoading(false);
-    }, 1000);
-  }, []);
+  const renderStars = (rating) => {
+    const stars = [];
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating - fullStars >= 0.5;
 
-  const addToCart = (product) => {
-    dispatch({ type: "ADD_TO_CART", payload: product });
-    toast.success("Added to cart!");
+    for (let i = 0; i < 5; i++) {
+      if (i < fullStars) {
+        stars.push(<FaStar key={i} className="star-icon filled" />);
+      } else if (i === fullStars && hasHalfStar) {
+        stars.push(<FaStarHalfAlt key={i} className="star-icon filled" />);
+      } else {
+        stars.push(<FaRegStar key={i} className="star-icon" />);
+      }
+    }
+    return stars;
   };
 
   const indexOfLastProduct = currentPage * productsPerPage;
@@ -76,6 +75,7 @@ function Home() {
 
   const handleCategoryChange = (category) => {
     setSelectedCategory(category);
+    setCurrentPage(1);
   };
 
   const sliderSettings = {
@@ -88,10 +88,12 @@ function Home() {
     autoplaySpeed: 5000,
     fade: true,
     arrows: false,
-    appendDots: (dots) => React.createElement('div', null,
-      React.createElement('ul', { className: 'slick-dots-custom' }, dots)
+    appendDots: (dots) => (
+      <div>
+        <ul className="slick-dots-custom">{dots}</ul>
+      </div>
     ),
-    customPaging: () => React.createElement('div', { className: 'slick-dot-custom' })
+    customPaging: () => <div className="slick-dot-custom" />,
   };
 
   const banners = [
@@ -103,119 +105,144 @@ function Home() {
     "https://i.ytimg.com/vi/3WvQvmCEX4w/maxresdefault.jpg",
   ];
 
+  const filteredProducts = selectedCategory === "all" 
+    ? products 
+    : products?.filter(product => product.category === selectedCategory);
+
   if (productsLoading || categoriesLoadingData) {
-    return React.createElement('div', { className: 'loading-container glass-effect' },
-      React.createElement('div', { className: 'loading-spinner' }),
-      React.createElement('p', { className: 'neon-effect' }, 'Loading...')
+    return (
+      <div className="loading-container glass-effect">
+        <div className="loading-spinner"></div>
+        <p className="neon-effect">Loading...</p>
+      </div>
     );
   }
 
   if (productsError || categoriesErrorData) {
-    return React.createElement('div', { className: 'error-container glass-effect' },
-      React.createElement('p', { className: 'neon-effect' },
-        `Error: ${productsError?.message || categoriesErrorData?.message}`
-      )
+    return (
+      <div className="error-container glass-effect">
+        <p className="neon-effect">
+          Error: {productsError?.message || categoriesErrorData?.message}
+        </p>
+      </div>
     );
   }
 
-  return React.createElement('div', { className: 'home-container' },
-    React.createElement(motion.h1, {
-      initial: { y: -20 },
-      animate: { y: 0 },
-      className: 'page-title gradient-text'
-    }, 'Welcome to YourShop'),
-    React.createElement(motion.div, {
-      className: 'slider-container',
-      initial: { opacity: 0, y: -20 },
-      animate: { opacity: 1, y: 0 },
-      transition: { duration: 0.5, delay: 0.2 }
-    },
-      React.createElement(Slider, sliderSettings,
-        banners.map((banner, index) => React.createElement('div', {
-          key: index,
-          className: 'slider-item'
-        },
-          React.createElement('img', {
-            src: banner,
-            alt: `Banner ${index + 1}`
-          })
-        ))
-      )
-    ),
-    React.createElement(motion.div, {
-      className: 'category-container',
-      initial: { opacity: 0, y: -20 },
-      animate: { opacity: 1, y: 0 },
-      transition: { duration: 0.5 }
-    },
-      React.createElement('div', { className: 'category-buttons' },
-        React.createElement(motion.button, {
-          whileHover: { scale: 1.05 },
-          whileTap: { scale: 0.95 },
-          className: `category-btn ${!selectedCategory ? "active" : ""}`,
-          onClick: () => handleCategoryChange(null),
-          'aria-pressed': !selectedCategory
-        }, 'All Categories'),
-        categories.map((category) => React.createElement(motion.button, {
-          key: category,
-          whileHover: { scale: 1.05 },
-          whileTap: { scale: 0.95 },
-          className: `category-btn ${selectedCategory === category ? "active" : ""}`,
-          onClick: () => handleCategoryChange(category),
-          'aria-pressed': selectedCategory === category
-        }, category.charAt(0).toUpperCase() + category.slice(1)))
-      )
-    ),
-    React.createElement('div', { className: 'products-grid' },
-      currentProducts.length === 0 ? React.createElement('div', { className: 'no-results glass-effect' },
-        React.createElement('p', { className: 'neon-effect' }, 'No products found in this category.')
-      ) : currentProducts.map((product) => React.createElement('div', {
-        key: product.id,
-        className: 'product-card'
-      },
-        React.createElement('div', { className: 'product-image' },
-          React.createElement(Link, { to: `/product/${product.id}` },
-            React.createElement('img', {
-              src: product.image,
-              alt: product.title
-            })
-          )
-        ),
-        React.createElement('div', { className: 'content' },
-          React.createElement(Link, { to: `/product/${product.id}` },
-            React.createElement('h3', { className: 'product-title neon-effect' }, product.title),
-            React.createElement('p', { className: 'product-price' }, `$${product.price.toFixed(2)}`)
-          ),
-          React.createElement(motion.button, {
-            whileHover: { scale: 1.05 },
-            whileTap: { scale: 0.95 },
-            onClick: () => addToCart(product),
-            className: 'add-to-cart-btn btn-primary'
-          }, 'Add to Cart')
-        )
-      ))
-    ),
-    React.createElement('div', { className: 'pagination-container' },
-      React.createElement(motion.button, {
-        whileHover: { scale: 1.1 },
-        whileTap: { scale: 0.9 },
-        className: `pagination-btn ${currentPage === 1 ? "disabled" : ""}`,
-        onClick: () => handlePageChange(currentPage - 1),
-        disabled: currentPage === 1,
-        'aria-label': 'Previous page'
-      }, 'Previous'),
-      React.createElement('span', { className: 'pagination-current', 'aria-live': 'polite' },
-        `${currentPage} / ${totalPages}`
-      ),
-      React.createElement(motion.button, {
-        whileHover: { scale: 1.1 },
-        whileTap: { scale: 0.9 },
-        className: `pagination-btn ${currentPage === totalPages ? "disabled" : ""}`,
-        onClick: () => handlePageChange(currentPage + 1),
-        disabled: currentPage === totalPages,
-        'aria-label': 'Next page'
-      }, 'Next')
-    )
+  return (
+    <div className={`home-container ${isDarkMode ? "dark" : "light"}`}>
+      <motion.h1
+        initial={{ y: -20 }}
+        animate={{ y: 0 }}
+        className="page-title gradient-text"
+      >
+        Welcome to YourShop
+      </motion.h1>
+      <motion.div
+        className="slider-container"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+      >
+        <Slider {...sliderSettings}>
+          {banners.map((banner, index) => (
+            <div key={index} className="slider-item">
+              <img src={banner} alt={`Banner ${index + 1}`} />
+            </div>
+          ))}
+        </Slider>
+      </motion.div>
+      <motion.div
+        className="category-container"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <div className="category-buttons">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className={`category-btn ${selectedCategory === "all" ? "active" : ""}`}
+            onClick={() => handleCategoryChange("all")}
+            aria-pressed={selectedCategory === "all"}
+          >
+            All Categories
+          </motion.button>
+          {categoriesData.map((category) => (
+            <motion.button
+              key={category}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className={`category-btn ${selectedCategory === category ? "active" : ""}`}
+              onClick={() => handleCategoryChange(category)}
+              aria-pressed={selectedCategory === category}
+            >
+              {category.charAt(0).toUpperCase() + category.slice(1)}
+            </motion.button>
+          ))}
+        </div>
+      </motion.div>
+      <div className="products-grid">
+        {filteredProducts?.map((product) => (
+          <motion.div
+            key={product.id}
+            className="product-card"
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            whileHover={{ scale: 1.05, rotateY: 5 }}
+          >
+            <div className="product-image">
+              <Link to={`/product/${product.id}`}>
+                <img src={product.image} alt={product.title} />
+              </Link>
+            </div>
+            <div className="content">
+              <Link to={`/product/${product.id}`}>
+                <h3 className="product-title neon-effect">{product.title}</h3>
+                <p className="product-price">${product.price.toFixed(2)}</p>
+              </Link>
+              <div className="rating-favorite-container">
+                <div className="star-rating">
+                  {renderStars(product.rating.rate)}
+                </div>
+                <button
+                  className="favorite-btn"
+                  onClick={() => toggleFavorite(product)}
+                  aria-label={favorites.some(fav => fav.id === product.id) ? "Remove from favorites" : "Add to favorites"}
+                >
+                  <FaHeart className={`heart-icon ${favorites.some(fav => fav.id === product.id) ? "filled" : ""}`} />
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+      <div className="pagination-container">
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          className={`pagination-btn ${currentPage === 1 ? "disabled" : ""}`}
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+          aria-label="Previous page"
+        >
+          Previous
+        </motion.button>
+        <span className="pagination-current" aria-live="polite">
+          {currentPage} / {totalPages}
+        </span>
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          className={`pagination-btn ${currentPage === totalPages ? "disabled" : ""}`}
+          onClick={() => handlePageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+          aria-label="Next page"
+        >
+          Next
+        </motion.button>
+      </div>
+    </div>
   );
 }
 
