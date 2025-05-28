@@ -1,0 +1,97 @@
+/* Fonts (ensure Orbitron is available) */
+@import url("https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&display=swap");
+
+/* Animations */
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes glow {
+  0% {
+    box-shadow: 0 0 10px #00ffc3;
+  }
+  100% {
+    box-shadow: 0 0 30px #00ffc3, 0 0 60px rgba(0, 255, 195, 0.5);
+  }
+}
+
+/* Loading Container */
+.loading {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 1000;
+  background: linear-gradient(
+    135deg,
+    rgba(17, 17, 17, 0.95),
+    rgba(26, 26, 26, 0.95)
+  ); /* Dark gradient */
+  border-radius: 12px;
+  border: 1px solid rgba(0, 255, 195, 0.3); /* Cyan border */
+  box-shadow: 0 0 20px rgba(0, 255, 195, 0.2), 0 0 40px rgba(0, 255, 195, 0.1); /* Neon glow */
+}
+
+/* Spinner */
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(255, 255, 255, 0.2); /* Subtle white for contrast */
+  border-top: 4px solid #00ffc3; /* Cyan for consistency */
+  border-radius: 50%;
+  animation: spin 1s linear infinite, glow 1.5s ease-in-out infinite alternate; /* Added glow animation */
+}
+
+/* Loading Text */
+.loading p {
+  margin-top: 1rem;
+  color: #00ffc3; /* Cyan text */
+  font-family: "Orbitron", sans-serif; /* Futuristic font */
+  font-size: 1rem;
+  font-weight: 500;
+  text-shadow: 0 0 8px rgba(0, 255, 195, 0.6), 0 0 16px rgba(0, 255, 195, 0.3); /* Neon text glow */
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Media Queries for Responsiveness */
+@media (max-width: 600px) {
+  .loading {
+    padding: 1.5rem;
+  }
+
+  .spinner {
+    width: 32px;
+    height: 32px;
+    border-width: 3px;
+  }
+
+  .loading p {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .loading {
+    padding: 1rem;
+  }
+
+  .spinner {
+    width: 28px;
+    height: 28px;
+    border-width: 3px;
+  }
+
+  .loading p {
+    font-size: 0.8rem;
+  }
+}
